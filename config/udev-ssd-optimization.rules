@@ -1,0 +1,11 @@
+# /etc/udev/rules.d/10-ssd-optimization.rules
+
+# Use lsusb to determine idVendor and idProduct for external SSD to enable TRIM
+ACTION=="add|change", ATTRS{idVendor}=="1234", ATTRS{idProduct}=="5678", SUBSYSTEM=="scsi_disk", ATTR{provisioning_mode}="unmap"
+
+# Force system to recognize USB disks as SSD (non-rotational) and change scheduler to "deadline"
+# udev can be glitchy at times, so we have to apply the scheduler change twice
+ACTION=="add|change", ATTRS{idVendor}=="1234", ATTRS{idProduct}=="5678", SUBSYSTEM=="block", ATTR{queue/rotational}="0", ATTR{queue/scheduler}="deadline"
+
+# For any SSD (non-rotational drives), make sure scheduler is set to "deadline"
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="deadline"
